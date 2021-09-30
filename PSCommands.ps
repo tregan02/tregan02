@@ -1,0 +1,402 @@
+# Input documentation and code for use with PowerShell - Develop site as both a repository and to get people up to speed with PowerShell
+# Show directory and recurse item
+dir c:\windows -recurse # can also use Dir -rec -path c:\windows
+# GetChildItem
+<# Output the followin info
+Name           Used (GB)     Free (GB) Provider      Root                                               CurrentLocation
+----           ---------     --------- --------      ----                                               ---------------
+Alias                                  Alias
+C                 417.82         47.34 FileSystem    C:\                                  users\rbt\Desktop\programming
+Cert                                   Certificate   \
+D                 875.88         55.51 FileSystem    D:\
+E                                      FileSystem    E:\
+Env                                    Environment
+Function                               Function
+HKCU                                   Registry      HKEY_CURRENT_USER
+HKLM                                   Registry      HKEY_LOCAL_MACHINE
+Variable                               Variable
+WSMan                                  WSMan #>
+Get-PSDrive
+# Show space used free provider and root
+Get-PSDrive -PSProvider FileSystem
+# Shows Directory
+Get-ChildItem
+# Show directory for D:
+Get-ChildItem d:
+# Sets the location of command
+set-location path
+New-Item -ItemType Directory -Path c:\ -name NewDirectory
+New-Item -ItemType File -Path c:\NewDirectory -Name Dropfile.txt -value "sometext here for thie"
+Set-Content -Path c:\NewDirectory\Dropfile.txt -Value "new replacement value"
+Set-Location c:\NewDirectory
+Get-Item Dropfile.txt
+Get-ChildItem
+Get-Content Dropfile.txt
+Get-Content Dropfile.txt | Out-GridView
+Get-Content Dropfile.txt | Out-Printer
+Rename-Item -Path c:\NewDirectory -NewName NewDirectory2
+Copy-Item -Path c:\NewDirectory\Dropfile.txt -Destination c:\NewDest #copies an item
+Move-Item -Path c:\NewDirectory\Dropfile.txt -Destination c:\NewDest #move a file
+Move-Item -Path c:\NewDirectory\Dropfile.txt -Destination c:\NewDest\Newname.txt #Moves and renames file
+Remove-Item c:\NewDirectory\Dropfile.txt #deletes and item
+Get-Command # Shows List of Commands
+Get-Command -CommandType [cmdlet | alias | function] #Shows list of commands by type 
+Get-Command | Where-Object { $_.CommandType -eq 'cmdlet'} # Similar result done differently
+Get-Command | Where-Object { $_.Name -like '*invoke*'}
+Get-Command | Where-Object { ($_.Name -like '*invoke*'} -and ($_.CommandType -eq 'cmdlet') }
+Get-Command | Where-Object { ($_.Name -like '*invoke*'} -and !($_.CommandType -eq 'cmdlet') }
+Get-Help Move-Item # gives help on command Move-Item
+Get-Help Move-Item -Example
+Get-Process
+Get-Service
+Get-Service | Where-Object -Property Status -eq -Value 'running'
+Stop-Process
+Stop-Process -Name Notepad
+Stop-Process -Id [process id] -Confirm -PassThru
+Get-WindowsDriver -Online -All
+Export-WindowsDriver -Online -Destination e:\Test\DriverBackup # backsup windows drivers
+Start-MPScan -ScanType QuickScan -ScanPath e:\scanhere #scan for malware
+Get-Command -CommandType Alias | ConvertTo-HTML | Out-File c:\users\rbt\desktop\programming\html\AliasInfo.html
+[System.DateTime](Get-Date -Format hh:mm:sstt) -gt [System.DateTime]"6:00:00pm" #Checks System Time against some other time ret t/f 
+IF ([System.DateTime](Get-Date -Format hh:mm:sstt) -gt [System.DateTime]"6:00:00pm")
+    {Write-Host "Did you hear the whistle blow?!!"}
+    Else {
+    Write-Host "Keep on truckin'"}
+	
+Set-Location C:\scripts
+Set-Content .\Files.txt (GET-ChildItem).Name
+
+Try {Get-WmiObject -Computer "Notacomputer.ath.vt.edu" -EA Stop -EV BiosErrors}
+Catch{
+Write-Host "Houston we have a problem"
+$BiosErrors | Out-File c:\scripts\errors.txt -Append
+}
+Finally{Write-Host "Displays either way"}
+
+install-module -name azuread # installs azure ad module in powershell - have to ok some things
+
+connect-azuread #connects to azuread - once connected can issue commands
+get-azureaduser # users in the azuread tenant
+disconnect-azuread #disconnects from azure ad
+get-help connect-azuread -examples #gives examples of what this command can do
+New-AzureADGroup -DisplayName "Technology Resources" -MailEnabled $false -SecurityEnabled $true -MailNickName "Techre" -Description "group for tech resources"
+Get-Service | Where-Object {$_.Status -eq "Running"} | Select-Object DisplayName
+$svc = Get-Service -ServiceName BITS 
+$method = Get-Member -MemberType Method
+Get-Service -ServiceName * | Select-Object -Property 'Status','DisplayName' | Sort-Object -Property 'Status' -Descending
+Get-WmiObject win32_Bios -ComputerName "Localhost"
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+pwsh.exe -ExecutionPolicy Unrestricted
+Get-Process | Select-Object -Property DisplayName, ID, WS
+Get-Process explorer | Select-Object -Property WS, Modules
+Get-Process explorer | Select-Object -Property ProcessName -ExpandProperty Modules
+Get-Process explorer | Select-Object -Property WS, Modules
+Get-Process explorer | Select-Object -Property ProcessName -ExpandProperty Modules | Format-List 
+Get-Process explorer | Select-Object -Property WS, Modules
+Get-Process | Sort-Object -Property WS | Select-Object -Last 10
+"One","Two","Three","One","One","Three" | Select-Object -Unique # Shows only unique values can be used with processes
+"One","Two","Three","One","One","Three" | Select-Object -Skip 2
+$object = [pscustomobject]@{Name="MyObject";Expand=@("One","Two","Three","Four","Five")}
+$object | Select-Object -ExpandProperty Expand -Property Name | Get-Member # Show property value and functions available
+Get-ChildItem -Path "C:\Scripts" -Filter *ps1 # Looks in specified folder and returns ps1 files found there
+Get-Command -ParametereName Filter # Shows withch commands filters work with
+$value = 10 if($value -lt 9){Write-Host "Value is less than 9"} else {Write-Host "Value is greater than 9"} #If/Then/Else
+
+# if then statements
+
+$a = 2
+$b = 3
+
+if ($a -gt $b) {
+	$messageOne = "Matched: This is message one"
+} else {
+	$messageOne = "Not Matched: This is message one"
+}
+if ($a -lt $b) {
+	$messageOne = "Matched: This is message two"
+} else {
+	$messageTwo = "Not Matched: This is message two"
+}
+if ($a -eq $b) {
+	$messageThree = "Matched: This is message three"
+} else {
+	$messageThree = "Not Matched: This is message three"
+}
+Write-Host $messageOne
+Write-Host $messageTwo
+Write-Host $messageThree
+# Ternary object in if then
+$customternaryobject = [PSCustomObject]@{
+	"messageOne" = (($a -gt $b) ? "Matched: This is message one" : "Not Matched: This is message one")
+	"messageTwo" = (($a -lt $b) ? "Matched: This is message two" : "Not Matched: This is message two")
+	"messageThree" = (($a -eq $b) ? "Matched: This is message three" : "Not Matched: This is message three")
+#ternary operator and choices depending on value 
+#switch command
+$value = Read-Host "What is your favorite Car brand"
+Switch($value)
+{
+	Ferrari {'You typed: Ferrari'}
+	Porsche {'You typed: Porsche'}
+	Maserati {'You typed: Maserati'}
+	Jeep {'You typed: Jeep'}
+	Ford {'You typed: Ford'}
+}
+
+$value = Read-Host "What is your favorite Car brand"
+$value2 = Read-Host "What is your second favorite Car brand"
+Switch($value,$value2)
+{
+	Ferrari {'You typed: Ferrari'}
+	Porsche {'You typed: Porsche'}
+	Maserati {'You typed: Maserati'}
+	Jeep {'You typed: Jeep'}
+	Ford {'You typed: Ford'}
+}
+
+# Create a help file with a function 
+function Multiply-FourNumbers()
+{
+[int32]$num1 = Read-Host {'Enter first number'}
+[int32]$num2 = Read-Host {'Enter second number'}
+[int32]$num3 = Read-Host {'Enter third	number'}
+[int32]$num4 = Read-Host {'Enter forth number'}
+    
+	
+	$result = $num1 * $num2 * $num3 * $num4
+	Write-Host "The result is:"
+    Write-Host "$($num1) * $($num2) * $($num3) * $($num4) = $($result)"
+<#
+	.SYNOPSIS
+	Multiplies 4 numbers and gives the result
+	
+	.Description
+	Multiply four numbers input by the user and returns result. Has a user input
+	Section for 4 numbers - make sure they are typed as [int32] or doesnt work
+	
+	.PARAMETER first
+	Enter first number
+	
+	.PARAMETER second
+	Enter second number
+	
+	.PARAMETER third
+	Enter third number
+	
+	.PARAMETER forth
+	Enter forth number
+	
+	.EXAMPLE 
+	c:\PS> Multiply-FourNumbers 
+			Enter first number: x
+			Enter second number: x
+			Enter third number: x
+			Enter forth number: x
+#>
+}
+
+#can also put help in a powershell ps1 file
+
+<#
+	.SYNOPSIS
+	Multiplies 4 numbers and gives the result
+	
+	.Description
+	Multiply four numbers input by the user and returns result. Has a user input
+	Section for 4 numbers - make sure they are typed as [int32] or doesnt work
+	
+	.PARAMETER first
+	Enter first number
+	
+	.PARAMETER second
+	Enter second number
+	
+	.PARAMETER third
+	Enter third number
+	
+	.PARAMETER forth
+	Enter forth number
+	
+	.EXAMPLE 
+	c:\PS> Multiply-FourNumbers 
+			Enter first number: x
+			Enter second number: x
+			Enter third number: x
+			Enter forth number: x
+#>
+
+Multipy-FourNumbers #once function is loaded should work
+
+Get-ChildItem c:\ or Get-ChildItem -Path c:\
+Get-ChildItem -Force c:\ #shows hidden files as well
+Get-ChildItem c:\ -Name
+Get-Command *item
+
+$Location = "C:\Scripts"
+Get-ChildItem -Force $Location
+Get-ChildItem -Force $Location -Recurse
+Get-ChildItem -Force $Location -Recurse -Include *.html
+Get-ChildItem -Force $Location -Recurse | Where-Object -FilterScript {($_.LastWriteItem -gt '2021-7-04')}
+New-Item -Path "$($Location)\TestFolder" -ItemType [Directory, File, SymbolicLink, Junction, HardLink]
+$document = 'input into the file that was created at 1:39' | Out-File -FilePath "$($Location)\TestFolder\TimeStamp.txt" 
+Remove-Item -Path "$($Location)\Foldertoremove" -Recurse
+Copy-Item -Path "$($Location)\Folder\File.ext -Destination "C:\Backups\File.ext"
+Rename-Item -Path "$($Location)\Folder\File.ext -NexName "newname.ext"
+Get-ChildItem "$($Location)\Folder\*.txt" | Rename-Item -NewName { $_.Name -replace '/.txt$',.bak}
+1..100 | ForEach-Object { Add-Content -Path "$($Location)\PSNumbers.txt" -Value "Item $_."}
+
+$Path =  "$($Location)\NameofXmlFile.xml"
+$XPath = "/drill/down/value-you-want-to-see"
+Select-Xml -Path $Path -Xpath $Xpath | Select-Object -ExpandProperty Node
+
+Get-Process | Export-Csv -Path "c:\scripts\processes.csv"
+Import-Csv "C:\Scripts\processes.csv" | ForEach-Object { Write-Host "$(Program Name: $_.Name), Company: $($_.Company), Description: $($_.Description), Product: $($_.Product), Product Version: $($_.ProductVersion)"}
+systeminfo /fo CSV |ConvertFrom-Csv | convertto-json | Out-File "c:\Scripts\Compinfo.json"
+Get-Content -Path "C:\Scripts\Compinfo.json" | ConvertFrom-Json |Out-GridView
+$jsonObject = Get-Content -Path "C:\Scripts\Compinfo.json" | ConvertFrom-Json
+
+$jsonObject2 = @{} #creates a blank json object
+$arrayList = New-Object SystemCollections.ArrayList
+$arrayList.Add(@{"Name"="Reid";"Surname"="Barr";"Gender"="M";})
+$arrayList.Add(@{"Name"="Jannie";"Surname"="Barr";"Gender"="F";})
+$arrayList.Add(@{"Name"="MaryAnne";"Surname"="Barr";"Gender"="F";})
+$fam = @{"Family"=arrayList;}
+
+Enable-PSRemoting -Force #Enables remoting
+Get-PSSessionConfiguration
+$session = New-PSSession -ComputerName localhost #PS remote to local machine for testing
+$session # will show the connection info
+Invoke-Command -Session $session -ScriptBlock { $PSVersionTable }
+Enter-PSSession localhost # runs ps commands on the other machine in this case localhost
+Exit-PSSession # Exits
+Invoke-Command -ComputerName localhost -ScriptBlock { Get-ComputerInfo }
+Remove-PSSession -Session $session
+Write-Host "First Message" && Write-Host "Second message if first is successful"
+
+$Location = "C:\Users\<user>\<folder>\<scriptfolder>\Start"
+$Session = New-PSSession -ComputerName localhost # where the connection will be made
+Invoke-Command -Session $Session - FilePath "$($Location)\Remote.ps1"
+
+Get-Service -Name EventLog -DependentServices
+
+Function Now-Advanced {
+	[cmdletBinding()]Param(
+		[Parameter(Mandatory=$True,HelpMessage="Enter the following information...")]
+		[ValidatePattern("[a-z][a-z],[0-9],[0-9],[0-9],[0-9]")]
+	
+	
+	$MyNumber)
+}
+
+$Session = New-PSSession -ComputerName localhost
+# pulls data from csv and shows last column
+Function Pull-csvinfo {
+[CmdletBinding()]Param(
+    [Parameter(Mandatory=$True,HelpMessage="Enter the first two letters of your last name and your four digit number", ValueFromPipelineByPropertyName=$True)]
+    [ValidatePattern("[a-z][a-z][0-9][0-9][0-9][0-9]")]
+    $EmployeeID)
+Process {
+    Write-Host $EmployeeID
+    }
+}
+
+Function Get-Compinfo {
+[CmdletBinding()]
+param()
+
+	$IP4Address=(Get-NetIPAddress).IPAddress
+	[array]$IPArray=$IP4Address.split(" ")
+	$PCName=(Get-CimInstance -ClassName win32_ComputerSystem).Name
+	$Make=(Get-CimInstance -ClassName win32_ComputerSystem).Manufacturer
+	$OS=(Get-CimInstance -ClassName win32_OperatingSystem).Caption
+	$Today=(Get-Date -Format MM/dd/yyyy)
+	
+	#Create a dictionary to store these values with a lable for each
+	$ComputerInformation=@{ComputerName=$PCName;
+						DateOfIP="$Today";
+					    IPAddress=$IPArray;
+						OperatingSystem=$OS;
+						Manufacturer="$Make";
+						WarrantyExpiration=[DateTime]"9/23/2021"}
+	
+return $ComputerInformation
+}
+
+<#
+Write long blocks of comments in between these brackets
+It will all be comments for your functions and scripts
+Put help info here
+.parameter 
+
+#>
+
+# Do not do this at home
+Function Get-InTrouble [
+[CmdletBinding(SupportsShouldProcess)]Param()#Adds the What-If and confirm to the function
+	Get-AdUser -Filter * <#Gets all AD Users#> | Remove-User <#Would remove all users#> - 
+]
+
+
+# Optimal (Default compression level) 
+Compress-Archive -Path '*.log' -DestinationPath archive.zip
+# Fastest compression level
+Compress-Archive -Path '*.log' -DestinationPath archive.zip -CompressionLevel Fastest
+# No compression
+Compress-Archive -Path '*.log' -DestinationPath archive.zip -CompressionLevel NoCompression
+
+Compress-Archive -Update -Path 'manual.pdf' -DestinationPath archive.zip
+
+Compress-Archive -Path '*.log' -DestinationPath archive.zip
+
+Compress-Archive -Path 'C:\Demo\*' -DestinationPath archive.zip
+
+ Compress-Archive -Path widget.png -DestinationPath archive.zip
+ 
+ #Install 7-zip for Powershell - must be admin
+ Install-Module -Name 7Zip4Powershell
+ # command to use it 
+ Get-7Zip -ArchiveFileName .\archive.zip
+ 
+ # Log file events to outupt file
+ Get-EventLog System | Where-Object {$_.EventID -eq "10016"} | Out-file "dcomfailperms.txt"
+ Get-EventLog Security -newest 100 | out-file "securityloglast100.txt"
+ 
+ Function Get-Last100Logs {
+ [CmdletBinding(SupportsShouldProcess)]Param()
+	Get-EventLog Security -newest 100 | out-file "securityloglast100.txt"
+	Get-EventLog System -newest 100 | out-file "systemloglast100.txt"
+	Get-EventLog Application -newest 100 | out-file "applicationloglast100.txt"
+	]
+ }
+Logging and powershell
+# Gets last 1000 events from System Log and sorts by number of each type
+Get-EventLog -LogName System -EntryType Error
+$Events = Get-EventLog -LogName System -Newest 1000
+$Events | Group-Object -Property Source -NoElement | Sort-Object -Property Count -Descending
+# Gets last 1000 events from System Log and sorts by number of each type and sends to text file
+$Events = Get-EventLog -LogName System -Newest 1000
+$Events | Group-Object -Property Source -NoElement | Sort-Object -Property Count -Descending | Out-File C:\Users\rbt\PSfolder\eventbytypelast1000.txt
+#Gets system logs from multiple servers
+Get-EventLog -LogName System -ComputerName Server01, Server02, Server03
+#Gets system log events with specific message
+Get-EventLog -LogName System -Message *description*
+#Display property values of an event
+$A = Get-EventLog -LogName System -Newest 1
+$A | Select-Object -Property *
+# Gets events with message description after sept 21 -after can be used to narrow range with -before sets range
+Get-EventLog -LogName System -Message *description* -After 09/21/2021 -Before 09/23/2021
+
+#New-item creates various items depending on the scope.  
+New-Item -Path "C:\Windows\System32" -Name "IT4Hokies" -ItemType "directory"
+
+Links to info
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-item?view=powershell-5.1
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-eventlog?view=powershell-5.1
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/clear-eventlog?view=powershell-5.1
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-eventlog?view=powershell-5.1
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_cimsession?view=powershell-7.1
+https://docs.microsoft.com/en-us/powershell/scripting/samples/creating-get-winevent-queries-with-filterhashtable?view=powershell-7.1
+https://ss64.com/ps/get-winevent.html
+https://www.codetwo.com/admins-blog/how-to-check-event-logs-with-powershell-get-eventlog/
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/?view=powershell-7.1
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-7.1
